@@ -2,7 +2,6 @@
 // app/admin/login/page.tsx
 import { useState } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import toast from 'react-hot-toast';
 
@@ -10,19 +9,18 @@ export default function AdminLoginPage() {
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
   const [loading,  setLoading]  = useState(false);
-  const router = useRouter();
 
   const login = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
     if (error) {
+      setLoading(false);
       toast.error('بيانات الدخول غير صحيحة');
     } else {
       toast.success('تم تسجيل الدخول');
-      router.push('/admin');
+      window.location.href = '/admin';
     }
   };
 
@@ -32,7 +30,6 @@ export default function AdminLoginPage() {
       style={{ background: 'var(--c-bg)' }}
     >
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="flex flex-col items-center mb-8">
           <Image src="/icons/icon-192x192.png" alt="Nexus Arab" width={64} height={64} className="rounded-2xl mb-3" />
           <h1 className="text-xl font-black" style={{ color: 'var(--c-text)' }}>Nexus Arab</h1>
