@@ -2,7 +2,6 @@
 // app/admin/login/page.tsx
 import { useState } from 'react';
 import Image from 'next/image';
-import { createClient } from '@/lib/supabase/client';
 import toast from 'react-hot-toast';
 
 export default function AdminLoginPage() {
@@ -13,14 +12,26 @@ export default function AdminLoginPage() {
   const login = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      setLoading(false);
-      toast.error('بيانات الدخول غير صحيحة');
-    } else {
+
+    try {
+      const res = await fetch('/api/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setLoading(false);
+        toast.error(data.error ?? 'بيانات الدخول غير صحيحة');
+        return;
+      }
+
       toast.success('تم تسجيل الدخول');
       window.location.href = '/admin';
+    } catch {
+      setLoading(false);
+      toast.error('حدث خطأ، حاول مرة أخرى');
     }
   };
 
