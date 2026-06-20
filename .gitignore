@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+
+# Production
+build/
+
+# Environment variables — NEVER commit
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# PWA
+public/workbox-*.js
+public/sw.js
+public/sw.js.map
+public/worker-*.js
+public/fallback-*.js
+
+# Android build artifacts
+android/
+*.apk
+*.aab
+*.keystore

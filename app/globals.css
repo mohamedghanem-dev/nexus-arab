@@ -1,0 +1,130 @@
+/* app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Cairo font variable ─────────────────────────────────── */
+:root {
+  --font-cairo: 'Cairo', sans-serif;
+}
+
+/* ── Dark theme (default) ────────────────────────────────── */
+:root,
+[data-theme="dark"] {
+  --c-bg:        #080d1a;
+  --c-bg2:       #0d1220;
+  --c-bg3:       #111827;
+  --c-accent:    #2563eb;
+  --c-accent-lt: #60a5fa;
+  --c-cyan:      #06b6d4;
+  --c-text:      #ffffff;
+  --c-text2:     rgba(255,255,255,0.70);
+  --c-text3:     rgba(255,255,255,0.45);
+  --c-border:    rgba(255,255,255,0.08);
+  --c-glass:     rgba(255,255,255,0.04);
+  --c-glow:      rgba(37,99,235,0.35);
+}
+
+/* ── Light theme ─────────────────────────────────────────── */
+[data-theme="light"] {
+  --c-bg:        #f0f4ff;
+  --c-bg2:       #e8eeff;
+  --c-bg3:       #dde6ff;
+  --c-accent:    #2563eb;
+  --c-accent-lt: #1d4ed8;
+  --c-cyan:      #0891b2;
+  --c-text:      #0f172a;
+  --c-text2:     #334155;
+  --c-text3:     #64748b;
+  --c-border:    rgba(37,99,235,0.15);
+  --c-glass:     rgba(37,99,235,0.04);
+  --c-glow:      rgba(37,99,235,0.20);
+}
+
+/* ── Base ────────────────────────────────────────────────── */
+* { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  font-family: var(--font-cairo), sans-serif;
+}
+
+body {
+  background-color: var(--c-bg);
+  color: var(--c-text);
+  min-height: 100dvh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ── Custom scrollbar ────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--c-bg2); }
+::-webkit-scrollbar-thumb { background: var(--c-accent); border-radius: 3px; }
+
+/* ── Horizontal scroll (testimonials) ───────────────────── */
+.scroll-x {
+  display: flex;
+  gap: 1.25rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 0.5rem;
+}
+.scroll-x::-webkit-scrollbar { display: none; }
+.scroll-x > * { scroll-snap-align: start; flex-shrink: 0; }
+
+/* ── Glass card ──────────────────────────────────────────── */
+.glass {
+  background: var(--c-glass);
+  border: 1px solid var(--c-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ── Gradient text ───────────────────────────────────────── */
+.grad-text {
+  background: linear-gradient(135deg, var(--c-accent-lt), var(--c-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Section padding ─────────────────────────────────────── */
+.section { padding-block: 5rem; }
+@media (max-width: 768px) { .section { padding-block: 3rem; } }
+
+/* ── Strike-through price ────────────────────────────────── */
+.price-old {
+  text-decoration: line-through;
+  color: var(--c-text3);
+}
+
+/* ── Ticker ──────────────────────────────────────────────── */
+.ticker-wrap {
+  overflow: hidden;
+  white-space: nowrap;
+}
+.ticker-inner {
+  display: inline-flex;
+  animation: ticker 30s linear infinite;
+}
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ── Focus ring ──────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Reduced motion ──────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

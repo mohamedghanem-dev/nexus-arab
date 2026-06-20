@@ -1,0 +1,96 @@
+# .github/workflows/build-apk-website.yml
+# يبني تطبيق Android (APK) للموقع كـ "غلاف" Capacitor يفتح الموقع المنشور فعلياً
+# (مش static export) — لأن الموقع فيه API routes (شات بوت) وبيانات Supabase حيّة،
+# ومينفعش يتحوّل لملفات static. الطريقة دي هي المعتمدة لمواقع Next.js فيها سيرفر فعّال.
+#
+# الأسرار المطلوبة في GitHub Secrets:
+#   SITE_URL            رابط الموقع المنشور، مثال: https://nexus-arab.vercel.app
+#   KEYSTORE_BASE64      ملف الـ keystore بصيغة base64
+#   KEY_ALIAS            اسم الـ alias
+#   KEYSTORE_PASSWORD     باسورد الـ keystore
+#   KEY_PASSWORD          باسورد الـ key
+
+name: Build Website APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/build-apk-website.yml'
+
+jobs:
+  build-website-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Capacitor
+        run: npm install @capacitor/core @capacitor/cli @capacitor/android
+
+      - name: Create minimal web shell (Capacitor يحتاج webDir حتى لو هيفتح رابط خارجي)
+        run: |
+          mkdir -p www
+          echo '<!doctype html><html><body>Loading…</body></html>' > www/index.html
+
+      - name: Write Capacitor config (يفتح رابط الموقع المنشور مباشرة)
+        run: |
+          cat > capacitor.config.json << EOF
+          {
+            "appId": "com.nexusarab.website",
+            "appName": "Nexus Arab",
+            "webDir": "www",
+            "server": {
+              "url": "${{ secrets.SITE_URL }}",
+              "cleartext": false
+            },
+            "android": {
+              "allowMixedContent": false
+            }
+          }
+          EOF
+
+      - name: Add Android platform
+        run: npx cap add android
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Build APK (Release)
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease
+
+      - name: Sign APK
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: android/app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.KEYSTORE_BASE64 }}
+          alias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexus-arab-website-apk
+          path: android/app/build/outputs/apk/release/*.apk
+          retention-days: 30
