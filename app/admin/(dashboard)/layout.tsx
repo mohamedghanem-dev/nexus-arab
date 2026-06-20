@@ -1,22 +1,34 @@
-// app/admin/layout.tsx
+// app/admin/(dashboard)/layout.tsx
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import { cookies } from 'next/headers';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) redirect('/admin/login');
+  const allCookies = cookies().getAll();
+  console.log('[admin-layout] cookie names:', allCookies.map(c => c.name));
 
-  // Verify admin
-  const { data: adminUser } = await supabase
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  console.log('[admin-layout] user:', user?.id, user?.email, 'error:', userError?.message);
+
+  if (!user) {
+    console.log('[admin-layout] NO USER -> redirecting to login');
+    redirect('/admin/login');
+  }
+
+  const { data: adminUser, error: adminError } = await supabase
     .from('admin_users')
     .select('id')
     .eq('id', user.id)
     .single();
+  console.log('[admin-layout] adminUser:', adminUser, 'adminError:', adminError?.message, adminError?.code);
 
-  if (!adminUser) redirect('/admin/login');
+  if (!adminUser) {
+    console.log('[admin-layout] NOT ADMIN -> redirecting to login');
+    redirect('/admin/login');
+  }
 
   return (
     <div className="min-h-screen flex" style={{ background: 'var(--c-bg)', direction: 'rtl' }}>
