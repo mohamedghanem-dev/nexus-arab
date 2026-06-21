@@ -31,11 +31,8 @@ export async function POST(req: NextRequest) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error || !data.user) {
-    console.log('[admin-login] signIn error:', error?.message);
-    return NextResponse.json({ error: 'بيانات الدخول غير صحيحة' }, { status: 401 });
+    return NextResponse.json({ error: `فشل الدخول: ${error?.message ?? 'لا يوجد مستخدم'}` }, { status: 401 });
   }
-
-  console.log('[admin-login] signed in user.id:', data.user.id, 'email:', data.user.email);
 
   const { data: adminUser, error: adminError } = await supabase
     .from('admin_users')
@@ -43,11 +40,11 @@ export async function POST(req: NextRequest) {
     .eq('id', data.user.id)
     .single();
 
-  console.log('[admin-login] adminUser:', JSON.stringify(adminUser), 'adminError:', JSON.stringify(adminError));
-
   if (!adminUser) {
     await supabase.auth.signOut();
-    return NextResponse.json({ error: 'هذا الحساب غير مصرح له بالدخول للوحة التحكم' }, { status: 403 });
+    return NextResponse.json({
+      error: `DEBUG: user.id=${data.user.id} | adminError_code=${adminError?.code ?? 'none'} | adminError_msg=${adminError?.message ?? 'none'}`
+    }, { status: 403 });
   }
 
   return response;
