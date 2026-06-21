@@ -31,14 +31,19 @@ export async function POST(req: NextRequest) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error || !data.user) {
+    console.log('[admin-login] signIn error:', error?.message);
     return NextResponse.json({ error: 'بيانات الدخول غير صحيحة' }, { status: 401 });
   }
 
-  const { data: adminUser } = await supabase
+  console.log('[admin-login] signed in user.id:', data.user.id, 'email:', data.user.email);
+
+  const { data: adminUser, error: adminError } = await supabase
     .from('admin_users')
     .select('id')
     .eq('id', data.user.id)
     .single();
+
+  console.log('[admin-login] adminUser:', JSON.stringify(adminUser), 'adminError:', JSON.stringify(adminError));
 
   if (!adminUser) {
     await supabase.auth.signOut();
